@@ -8,7 +8,7 @@
     "skipLibCheck": true,
 
     /* Bundler mode */
-    "moduleResolution": "bundler",
+    "moduleResolution": "node",
     "allowImportingTsExtensions": true,
     "isolatedModules": true,
     "moduleDetection": "force",
@@ -20,7 +20,16 @@
     "noUnusedLocals": true,
     "noUnusedParameters": true,
     "noFallthroughCasesInSwitch": true,
-    "noUncheckedSideEffectImports": true
+    "noUncheckedSideEffectImports": true,
+
+    /* Fix for styled-components */
+    "esModuleInterop": true,
+    "allowSyntheticDefaultImports": true,
+    "types": ["@types/styled-components"],
+    "baseUrl": "./",
+    "paths": {
+      "styled-components": ["node_modules/styled-components"]
+    }
   },
   "include": ["src"]
 }
