@@ -112,6 +112,28 @@ const MatchedText = styled.p`
   color: black;
 `;
 
+const NotMatchedContainer = styled.div`
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  width: 200px;
+  height: 200px;
+  transform: translate(-50%, -50%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(255, 255, 255, 1);
+  padding: 20px;
+  border-radius: 10px;
+  z-index: 10;
+  animation: ${fadeInScale} 0.5s ease-in-out;
+`;
+
+const NotMatchedIcon = styled.div`
+  font-size: 150px;
+  color: red;
+`;
+
 /* Lấy số khớp từ tên ảnh */
 const parseImageName = (name: string): number => {
   const match = name.match(/-(\d+)\.jpg$/);
@@ -146,6 +168,7 @@ const GameBoard: React.FC = () => {
     top: ImageItem;
     bottom: ImageItem;
   } | null>(null);
+  const [notMatched, setNotMatched] = useState<boolean>(false);
 
   /* Xử lý chọn ảnh */
   const handleImageClick = (id: string, row: "top" | "bottom") => {
@@ -166,21 +189,30 @@ const GameBoard: React.FC = () => {
         if (parseImageName(topImage.src) === parseImageName(bottomImage.src)) {
           // Nếu match, hiển thị cặp ảnh
           setMatchedPair({ top: topImage, bottom: bottomImage });
+        } else {
+          setNotMatched(true);
 
           setTimeout(() => {
-            setTopRow((prev) => prev.filter((img) => img.id !== topId));
-            setBottomRow((prev) => prev.filter((img) => img.id !== bottomId));
-            setMatchedPair(null);
-          }, 30000);
-        } else {
-          // Nếu không match, bỏ chọn ảnh
-          setSelectedTop(null);
-          setSelectedBottom(null);
+            setNotMatched(false);
+            setSelectedTop(null);
+            setSelectedBottom(null);
+          }, 3000);
         }
       }
     },
     [bottomRow, topRow]
   );
+
+  const handleBackdropClick = () => {
+    if (matchedPair) {
+      // Xóa ảnh đã match khỏi danh sách
+      setTopRow((prev) => prev.filter((img) => img.id !== matchedPair.top.id));
+      setBottomRow((prev) =>
+        prev.filter((img) => img.id !== matchedPair.bottom.id)
+      );
+      setMatchedPair(null);
+    }
+  };
 
   /* Khi cả hai ảnh được chọn, kiểm tra match */
   useEffect(() => {
@@ -193,10 +225,13 @@ const GameBoard: React.FC = () => {
 
   return (
     <>
-      {matchedPair && <Backdrop onClick={() => setMatchedPair(null)} />}
+      {(matchedPair || notMatched) && (
+        <Backdrop onClick={handleBackdropClick} />
+      )}
+
       <GameContainer>
         {matchedPair && (
-          <MatchedContainer onClick={() => setMatchedPair(null)}>
+          <MatchedContainer>
             <MatchedImageContainer>
               <MatchedImage src={matchedPair.top.src} alt="Matched Top" />
               <MatchedText>{matchedPair.top.name}</MatchedText>
@@ -206,6 +241,12 @@ const GameBoard: React.FC = () => {
               <MatchedText>{matchedPair.bottom.name}</MatchedText>
             </MatchedImageContainer>
           </MatchedContainer>
+        )}
+
+        {notMatched && (
+          <NotMatchedContainer>
+            <NotMatchedIcon>✖</NotMatchedIcon>
+          </NotMatchedContainer>
         )}
 
         <ImageRowsWrapper>
